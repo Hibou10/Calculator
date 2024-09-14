@@ -1,4 +1,6 @@
 let buffer = '0';
+let runningTotal = 0;
+let previousOperator;
 const screen = document.querySelector(".screen");
 
 function buttonClick(value) {
@@ -20,27 +22,66 @@ function handleNumber(number){
     }  
 }
 
+function handleMath(value){
+    if (buffer === '0') {
+        // do nothing
+        return;
+    }
+ 
+    const intBuffer = parseInt(buffer);
+    if (runningTotal === 0) {
+        runningTotal = intBuffer;
+    } else {
+        flushOperation(intBuffer);
+    }
+    
+    previousOperator = value;
+    buffer = '0';
+    console.log(runningTotal);
+}
+
+function flushOperation(intBuffer) {
+    if (previousOperator === '+') {
+        runningTotal = runningTotal + intBuffer;
+    } else if (previousOperator === '-') {
+        runningTotal = runningTotal - intBuffer;
+    }  else if (previousOperator === 'x') {
+        runningTotal = runningTotal * intBuffer;
+    } else if (previousOperator === '÷') {
+        runningTotal = runningTotal / intBuffer;
+    }
+}
+
 function handleSymbol(symbol){
     switch (symbol) {
         case 'C':
             buffer = '0';
-            console.log('clear');
             break;
+
         case '=':
-            console.log('equals'); 
+            if (previousOperator === null) {
+                //need do numbers to do math
+                return;
+            }
+            flushOperation(parseInt(buffer));
+            previousOperator = null;
+            buffer = "" + runningTotal;
+            runningTotal = 0;
             break;
+
         case '⬅':
             if(buffer.length === 1){   // Wenn Buffer nur eine Ziffer enthält
                 buffer = '0';         // buffer wird auf 0 gesetzt
             } else {
                 buffer = buffer.substring(0, buffer.length - 1);     // Entfene die letzte Ziffer (0 start, buffer.length-1 is end)
             }
-            break;    
+            break;  
+
         case '+':
         case '-':
         case '÷':
         case 'x':
-            console.log('math symbol');
+            handleMath(symbol);
             break;   
     }
 }
